@@ -10,3 +10,5 @@ module "app_database" {
 
   depends_on = [module.s3_infrastructure]
 }
+
+#тестовий коментар
