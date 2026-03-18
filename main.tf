@@ -1,6 +1,7 @@
 module "s3_infrastructure" {
   source      = "./modules/s3_bucket"
   bucket_name = var.s3_bucket_name
+  env_tag     = "main"
 }
 
 
@@ -26,4 +27,6 @@ source = "./modules/s3_bucket"
 for_each = var.dept_settings
 # Беремо конкретне значення з мапи
 bucket_name = each.value.bucket_name
+# Ось ми дістали "prod" або "dev" з нашої мапи!
+env_tag     = each.value.env 
 }
