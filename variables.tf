@@ -9,3 +9,9 @@ description	= "Our PostgreSQL database name"
 type		= string
 default		= "default_db_name"
 }
+
+variable "extra_buckets" {
+  description = "Список додаткових бакетів для відділів"
+  type        = list(string)
+  default     = ["finance-dept", "marketing-dept", "legal-dept"]
+}
