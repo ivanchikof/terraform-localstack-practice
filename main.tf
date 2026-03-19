@@ -30,3 +30,17 @@ bucket_name = each.value.bucket_name
 # Ось ми дістали "prod" або "dev" з нашої мапи!
 env_tag     = each.value.env 
 }
+
+
+
+#Створюємо бакет вручну для tfstate
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "ivanchikof-tf-state-2026" 
+}
+#Ввімкнення "Машини часу" (Versioning)
+resource "aws_s3_bucket_versioning" "state_versioning" {
+  bucket = aws_s3_bucket.terraform_state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}

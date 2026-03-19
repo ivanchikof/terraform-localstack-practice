@@ -25,3 +25,13 @@ variable "dept_settings"{
     legal     = {bucket_name = "corp-leagal-docs", env = "prod"}
   }
 }
+
+variable "bucket_name" {
+  type    = string
+  default = "my-test-bucket-2026"
+
+  validation {
+    condition     = length(var.bucket_name) > 3 && can(regex("^[a-z0-9-]+$", var.bucket_name))
+    error_message = "Помилка: назва бакета має бути довшою за 3 символи і містити тільки малі літери, цифри, крапки або дефіси."
+  }
+}
