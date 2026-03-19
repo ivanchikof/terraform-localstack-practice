@@ -1,3 +1,33 @@
+terraform {
+  backend "s3" {
+    bucket = "ivanchikof-tf-state-2026"  # Назва твого сейфа
+    key    = "dev/terraform.tfstate"     # Шлях до файлу (як папка в Google Drive)
+    region = "us-east-1"                 # Регіон (для LocalStack зазвичай цей)
+
+    # Ці 4 рядки потрібні ТІЛЬКИ для LocalStack:
+    endpoints = {
+      s3  = "http://localhost:4566"
+}
+    skip_requesting_account_id = true
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    force_path_style            = true
+  }
+}
+
+#Створюємо бакет вручну для tfstate
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "ivanchikof-tf-state-2026" 
+}
+#Ввімкнення "Машини часу" (Versioning) для tfstate
+resource "aws_s3_bucket_versioning" "state_versioning" {
+  bucket = aws_s3_bucket.terraform_state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+
 module "s3_infrastructure" {
   source      = "./modules/s3_bucket"
   bucket_name = var.s3_bucket_name
@@ -33,14 +63,4 @@ env_tag     = each.value.env
 
 
 
-#Створюємо бакет вручну для tfstate
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "ivanchikof-tf-state-2026" 
-}
-#Ввімкнення "Машини часу" (Versioning)
-resource "aws_s3_bucket_versioning" "state_versioning" {
-  bucket = aws_s3_bucket.terraform_state.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
+
