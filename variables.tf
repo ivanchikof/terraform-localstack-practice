@@ -35,3 +35,19 @@ variable "bucket_name" {
     error_message = "Помилка: назва бакета має бути довшою за 3 символи і містити тільки малі літери, цифри, крапки або дефіси."
   }
 }
+
+variable "additional_tags"{
+  type    = map(string)
+  default = {
+    "Project"     = "Education"
+    "Environment" = "Training"
+    "Owner"       = "Ivanchikof"
+  }
+}
+
+variable "enable_logging"{
+  description = "Чи вмикати логування для бакета"
+  type        = bool
+  default     = true #За замовчуванням вимкнено
+
+}
