@@ -1,3 +1,11 @@
+locals {
+  # Створюємо префікс, який залежить від воркспейсу
+  #env_prefix = terraform.workspace
+  
+  # Можна навіть зробити так, щоб для default префікса не було, а для інших - був
+  env_prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+}
+
 terraform {
   backend "s3" {
     bucket = "ivanchikof-tf-state-2026"  # Назва твого сейфа
@@ -20,7 +28,7 @@ terraform {
 
 #Створюємо бакет вручну для tfstate
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "ivanchikof-tf-state-2026" 
+  bucket = "${local.env_prefix}ivanchikof-tf-state-2026" 
 }
 
 
@@ -34,7 +42,8 @@ resource "aws_s3_bucket_versioning" "state_versioning" {
 
 
 resource "aws_dynamodb_table" "terraform_locks"{
-  name         = "ivanchikof-tf-state-locking" # Назва таблиці
+  #name         = "ivanchikof-tf-state-locking" # Назва таблиці
+  name = "${local.env_prefix}ivanchikof-tf-state-locking"
   billing_mode = "PAY_PER_REQUEST"             # Платимо тільки коли користуємося
   hash_key     = "LockID"                      # Це обов'язкове ім'я ключа для Terraform!
 
@@ -48,14 +57,17 @@ resource "aws_dynamodb_table" "terraform_locks"{
 
 module "s3_infrastructure" {
   source      = "./modules/s3_bucket"
-  bucket_name = var.s3_bucket_name
+  #bucket_name = var.s3_bucket_name
+  bucket_name = "${local.env_prefix}${var.s3_bucket_name}"
   env_tag     = "main"
 }
 
 
 module "app_database" {
   source = "./modules/postgres_db"
-  app_db_name = var.db_name
+  #app_db_name = var.db_name
+  # Додай префікс тут:
+  app_db_name = "${local.env_prefix}${var.db_name}"
 
   depends_on = [module.s3_infrastructure]
 }
@@ -74,14 +86,16 @@ source = "./modules/s3_bucket"
 # Тепер ітеруємося по мапі
 for_each = var.dept_settings
 # Беремо конкретне значення з мапи
-bucket_name = each.value.bucket_name
+#bucket_name = each.value.bucket_name
+# Додаємо префікс до імені кожного бакета відділу
+bucket_name = "${local.env_prefix}${each.value.bucket_name}"
 # Ось ми дістали "prod" або "dev" з нашої мапи!
 env_tag     = each.value.env 
 }
 
 
 resource "aws_s3_bucket" "manual_bucket" {
-bucket = "manual-created-bucket-2026"
+bucket = "${local.env_prefix}manual-created-bucket-2026"
 
 # Замість того, щоб писати кожен тег окремо, 
   # ми можемо передати цілу мапу (map)
