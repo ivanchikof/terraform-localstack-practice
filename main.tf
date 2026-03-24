@@ -99,7 +99,11 @@ bucket = "${local.env_prefix}manual-created-bucket-2026"
 
 # Замість того, щоб писати кожен тег окремо, 
   # ми можемо передати цілу мапу (map)
-  tags = var.additional_tags
+  #tags = var.additional_tags
+  # Ми зклеюємо стандартні теги з нашим динамічним Environment
+  tags = merge(var.additional_tags, {
+    Environment = terraform.workspace
+  })
 
 # ДИНАМІЧНИЙ БЛОК (пишеться всередині ресурсу)
 dynamic "logging"{
