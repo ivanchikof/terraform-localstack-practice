@@ -4,27 +4,31 @@ locals {
   
   # Можна навіть зробити так, щоб для default префікса не було, а для інших - був
   env_prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+  # Створюємо спільну мапу тегів
+  common_tags = merge(var.additional_tags, {
+    Environment = terraform.workspace
+  })
 }
 
-terraform {
-  backend "s3" {
-    bucket = "ivanchikof-tf-state-2026"  # Назва твого сейфа
-    key    = "dev/terraform.tfstate"     # Шлях до файлу (як папка в Google Drive)
-    region = "us-east-1"                 # Регіон (для LocalStack зазвичай цей)
+#terraform {
+  #backend "s3" {
+    #bucket = "ivanchikof-tf-state-2026"  # Назва твого сейфа
+    #key    = "dev/terraform.tfstate"     # Шлях до файлу (як папка в Google Drive)
+    #region = "us-east-1"                 # Регіон (для LocalStack зазвичай цей)
     
-    dynamodb_table = "ivanchikof-tf-state-locking" # Вкажи назву, яку ти дав у коді
+    #dynamodb_table = "ivanchikof-tf-state-locking" # Вкажи назву, яку ти дав у коді
 
     # Ці 4 рядки потрібні ТІЛЬКИ для LocalStack:
-    endpoints = {
-      s3  = "http://localhost:4566"
-      dynamodb = "http://localhost:4566" # Додаємо точку доступу для бази даних
-}
-    skip_requesting_account_id = true
-    skip_credentials_validation = true
-    skip_metadata_api_check     = true
-    force_path_style            = true
-  }
-}
+   # endpoints = {
+  #    s3  = "http://localhost:4566"
+ #     dynamodb = "http://localhost:4566" # Додаємо точку доступу для бази даних
+#}
+ #   skip_requesting_account_id = true
+  #  skip_credentials_validation = true
+   # skip_metadata_api_check     = true
+    #force_path_style            = true
+  #}
+#}
 
 #Створюємо бакет вручну для tfstate
 resource "aws_s3_bucket" "terraform_state" {
@@ -93,6 +97,14 @@ bucket_name = "${local.env_prefix}${each.value.bucket_name}"
 env_tag     = each.value.env 
 }
 
+module "my_web_server" {
+source = "./modules/web_server"
+
+# Передаємо значення в змінні модуля
+  project_name = local.common_tags.Project
+  owner        = local.common_tags.Owner
+}
+
 
 resource "aws_s3_bucket" "manual_bucket" {
 bucket = "${local.env_prefix}manual-created-bucket-2026"
@@ -116,4 +128,38 @@ dynamic "logging"{
     target_prefix = "log/"
    }
   }
+}
+
+
+resource "aws_security_group" "web_sg" {
+  name        = "${local.env_prefix}web-sg"
+  description = "Allow HTTP inbound traffic"
+
+  # Дозволяємо вхід (Ingress)
+  ingress {
+    from_port   = 80            # Порт нашого веб-сервера Nginx
+    to_port     = 80
+    protocol    = "tcp"         # Протокол передачі даних
+    cidr_blocks = ["0.0.0.0/0"] # "Весь світ"
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # В реальному житті тут має бути тільки твій IP!
+  }
+
+  # Дозволяємо вихід (Egress)
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"          # Всі протоколи
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "${local.env_prefix}deployer-key"
+  public_key = file("${path.module}/my-localstack-key.pub")
 }
