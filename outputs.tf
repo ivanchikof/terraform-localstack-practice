@@ -27,3 +27,12 @@ output "all_department_bucket_id" {
     for k, v in module.department_buckets : k => v.bucket_id
   }
 }
+
+output "final_web_server_id"{
+  value = module.my_web_server.web_server_id
+}
+output "final_web_server_ip" {
+  value = module.my_web_server.web_server_public_ip
+
+}
+
