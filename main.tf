@@ -163,3 +163,19 @@ resource "aws_key_pair" "deployer" {
   key_name   = "${local.env_prefix}deployer-key"
   public_key = file("${path.module}/my-localstack-key.pub")
 }
+
+# Кажемо Terraform використати вже існуючий образ
+resource "docker_image" "nginx_image" {
+  name = "my-first-nginx:latest"
+}
+
+# Запускаємо контейнер на основі цього образу
+resource "docker_container" "my_web_server" {
+  image = docker_image.nginx_image.image_id
+  name  = "terraform-managed-nginx"
+  
+  ports {
+    internal = 80
+    external = 8081 # Ми змінили на 8081, щоб не плутати з твоїм ручним тестом
+  }
+}
