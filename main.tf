@@ -176,6 +176,12 @@ resource "docker_container" "my_web_server" {
   
   ports {
     internal = 80
-    external = 8081 # Ми змінили на 8081, щоб не плутати з твоїм ручним тестом
+    external = 8081 
+  }
+
+  # Оце та сама магія Volume у мові Terraform
+  volumes {
+    host_path      = "${abspath(path.module)}/custom_html"
+    container_path = "/usr/share/nginx/html"
   }
 }
