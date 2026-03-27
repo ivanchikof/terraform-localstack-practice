@@ -12,6 +12,10 @@ terraform {
       source  = "cyrilgdn/postgresql"
       version = "~> 1.22.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.11.1"
+    }
   }
 }
 
@@ -27,6 +31,7 @@ provider "aws" {
     sts      = "http://127.0.0.1:4566" # І цей (для авторизації)
     iam      = "http://127.0.0.1:4566" # (Identity and Access Management)
     ec2      = "http://127.0.0.1:4566"
+    rds      = "http://localhost:4566"
   }
 
   # Ці параметри допомагають працювати з локальним емулятором без помилок:
@@ -37,10 +42,12 @@ provider "aws" {
 
 # Блок для postgresql
 provider "postgresql" {
-host		="localhost"
-port		=5432
-database	="postgres"
-username	="admin"
-password	="password"
-sslmode		="disable" #для локальної роботи шифрування не потрібне
+  host		="127.0.0.1"
+  port		=5433
+  database	="postgres"
+  username	="postgres"
+  password	= var.db_password
+  sslmode		="disable" #для локальної роботи шифрування не потрібне
+
+  connect_timeout = 15
 }

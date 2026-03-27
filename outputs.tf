@@ -36,3 +36,10 @@ output "final_web_server_ip" {
 
 }
 
+output "database_connection_string" {
+description = "рядок підключення до бази для розробника"
+value       = "postgresql://postgres@localhost:${module.app_database.db_port}/app_production_db"
+sensitive   = true # Щоб не "світити" пароль у консолі, але показати структуру
+
+}
+

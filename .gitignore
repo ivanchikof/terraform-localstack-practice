@@ -1,5 +1,13 @@
+# Ігноруємо локальні налаштування Terraform
 .terraform/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+
+# Ігноруємо файли з паролями
 *.tfvars
+*.tfvars.json
+
+# Ігноруємо логи та тимчасові файли
+*.log
+.env

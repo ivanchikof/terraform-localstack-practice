@@ -72,8 +72,12 @@ module "app_database" {
   #app_db_name = var.db_name
   # Додай префікс тут:
   app_db_name = "${local.env_prefix}${var.db_name}"
+  
+  # Передаємо наш секретний пароль у модуль
+  db_pass = var.db_password
 
   depends_on = [module.s3_infrastructure]
+  network_name = docker_network.app_network.name
 }
 
 #module "department_buckets" {
@@ -178,10 +182,23 @@ resource "docker_container" "my_web_server" {
     internal = 80
     external = 8081 
   }
+  networks_advanced {
+    name = docker_network.app_network.name
+  }
 
   # Оце та сама магія Volume у мові Terraform
   volumes {
     host_path      = "${abspath(path.module)}/custom_html"
     container_path = "/usr/share/nginx/html"
   }
+}
+
+resource "docker_network" "app_network" {
+  name = "my_app_network"
+}
+
+output "website_url" {
+  description = "Адреса твого веб-сервера Nginx"
+  # Ми беремо назву контейнера і порт, який ми відкрили
+  value       = "http://localhost:${docker_container.my_web_server.ports[0].external}"
 }

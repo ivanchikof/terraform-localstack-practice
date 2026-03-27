@@ -51,3 +51,11 @@ variable "enable_logging"{
   default     = true #За замовчуванням вимкнено
 
 }
+
+variable "db_password" {
+  description = "Postgres bd password"
+  type        = string
+  default     = "SuperSecret123!" # В реальному житті дефолт краще не ставити
+
+  sensitive   = true
+}
