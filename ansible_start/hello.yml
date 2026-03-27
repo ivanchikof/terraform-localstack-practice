@@ -1,0 +1,8 @@
+---
+- name: Мій перший сценарій
+  hosts: my_computers
+  tasks:
+    - name: Створити файл з привітанням
+      copy:
+        content: "Привіт, я Ansible і я працюю на Linux!"
+        dest: /home/ivanchikof/ansible_hello.txt

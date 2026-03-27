@@ -1,0 +1,14 @@
+---
+- name: Діагностика веб-сервера
+  hosts: my_computers
+  tasks:
+    - name: Запитати заголовок сайту (порт 80)
+      shell: "curl -I http://localhost:80"
+      register: web_output
+      ignore_errors: yes            # Розжовуємо: щоб плейбук не впав, якщо сервер вимкнений
+
+    - name: Показати статус відповіді
+      debug:
+        msg: 
+          - "--- РЕЗУЛЬТАТ ЗАПИТУ ---"
+          - "{{ web_output.stdout_lines[0] | default('Сайт не відповідає!') }}"

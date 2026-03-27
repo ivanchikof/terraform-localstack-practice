@@ -43,3 +43,9 @@ sensitive   = true # Щоб не "світити" пароль у консолі
 
 }
 
+output "storage_info" {
+  value = {
+    s3_bucket = module.app_storage.s3_bucket_name
+    db_table  = module.app_storage.dynamodb_table_name
+  }
+}

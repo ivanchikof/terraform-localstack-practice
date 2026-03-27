@@ -202,3 +202,10 @@ output "website_url" {
   # Ми беремо назву контейнера і порт, який ми відкрили
   value       = "http://localhost:${docker_container.my_web_server.ports[0].external}"
 }
+
+module "app_storage" {
+  source = "./modules/app_storage"
+  project_name = "my-cool-app"
+  environment = "dev"
+
+}
